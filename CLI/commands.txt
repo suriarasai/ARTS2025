@@ -5,7 +5,8 @@ kafka-server-start.bat c:\kafka\config\kraft\server.properties
 kafka-topics.bat --list --bootstrap-server localhost:9092
 
 # Shell 2 List Topics Under Consumer Group
-kafka-consumer-groups.bat --bootstrap-server localhost:9092 --list
+# In case there is trouble using zookeeper, you can start/stop via
+zookeeper-server-start.bat c:\kafka\config\
 
 # Shell 3
 kafka-topics.bat --list --bootstrap-server localhost:9092
