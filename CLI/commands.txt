@@ -1,1 +1,30 @@
+# Shell 1 Start the server
+kafka-server-start.bat c:\kafka\config\kraft\server.properties
+kafka-topics.bat --list --bootstrap-server localhost:9092
 
+# Shell 2 List Topics Under Consumer Group
+kafka-consumer-groups.bat --bootstrap-server localhost:9092 --list
+
+# Shell 3
+kafka-topics.bat --list --bootstrap-server localhost:9092
+kafka-topics.bat --topic first-topic --create --partitions 3 --replication-factor 1 --bootstrap-server localhost:9092
+kafka-topics.bat --topic first-topic –describe --bootstrap-server localhost:9092
+kafka-topics.bat --topic second-topic --create --partitions 1 --replication-factor 1 --bootstrap-server localhost:9092
+kafka-topics.bat --list --bootstrap-server localhost:9092
+
+#Shell 4
+kafka-console-producer --topic first-topic --bootstrap-server localhost:9092
+kafka-console-producer --topic first-topic --producer-property acks=all --broker-list localhost:9092
+
+
+#Shell 5
+kafka-console-consumer.bat --topic first-topic --group my-first-application --bootstrap-server localhost:9092
+kafka-console-consumer.bat --topic first-topic --group my-first-application -from-beginning --bootstrap-server localhost:9092
+
+#Shell 6
+kafka-console-consumer.bat --topic first-topic --group my-first-application -from-beginning --bootstrap-server localhost:9092
+kafka-consumer-groups.bat --list --bootstrap-server localhost:9092
+
+kafka-consumer-groups.bat --describe --group my-second-application --bootstrap-server localhost:9092
+kafka-console-consumer.bat --topic first-topic --group my-second-application --bootstrap-server localhost:9092
+kafka-console-consumer.bat --topic first-topic --group my-second-application --bootstrap-server localhost:9092
