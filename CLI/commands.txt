@@ -1,4 +1,6 @@
 # Shell 1 Start the server
+[guid]::NewGuid()
+kafka-storage.bat format -t <<UUID>> -c C:\kafka\config\kraft\server.properties
 kafka-server-start.bat c:\kafka\config\kraft\server.properties
 kafka-topics.bat --list --bootstrap-server localhost:9092
 
