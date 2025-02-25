@@ -28,7 +28,7 @@ wordCounts = words.groupBy("word").count()
 
 query = wordCounts \
     .writeStream \
-    .outputMode("append") \
+    .outputMode("complete") \
     .format("console") \
     .start()
 
