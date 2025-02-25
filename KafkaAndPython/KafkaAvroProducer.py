@@ -28,3 +28,5 @@ def send_message(topic, message):
 
 # Example usage
 send_message('users', {'id': 1, 'name': 'Tan Ah Beng', 'email': 'ah.beng@example.iss'})
+# Example usage
+send_message('users', {'id': '2', 'name': 'Tan Ah Beng Sister', 'email': 'ah.beng.sis@example.iss'})
