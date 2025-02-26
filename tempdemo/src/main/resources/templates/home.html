@@ -74,10 +74,10 @@
 		window.myLine = new Chart(ctx, config);
 		
 		/* Configuring WebSocket on Client Side */
-		var socket = new SockJS('/live-temperature');
+		var socket = new SockJS('/temperature1');
 		stompClient = Stomp.over(socket);
 		stompClient.connect({}, function(frame) {
-			stompClient.subscribe('/topic/temperature', function(temperature) {
+			stompClient.subscribe('/topic/temperature1', function(temperature) {
 				$('#temperature').text(temperature.body);
 				/* Push new data On X-Axis of Chart */
 				config.data.labels.push(new Date());

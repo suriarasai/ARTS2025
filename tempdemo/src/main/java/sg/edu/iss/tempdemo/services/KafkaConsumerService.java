@@ -15,7 +15,7 @@ public class KafkaConsumerService{
 	@KafkaListener(topics="${kafka.topic}")
 	public void consume(@Payload String message) {
 		if(isNumeric(message)) {
-			template.convertAndSend("/topic/temperature", message);
+			template.convertAndSend("/topic/temperature1", message);
 		}
 		
 	}
