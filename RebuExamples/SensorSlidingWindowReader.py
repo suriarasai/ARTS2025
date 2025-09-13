@@ -32,7 +32,7 @@ sensor_df.printSchema()
 agg_df = sensor_df \
     .withWatermark("CreatedTime", "30 minute") \
     .groupBy(col("sensor_id"),
-             window(col("CreatedTime"), "15 minute", "5 minute")) \
+             window(col("CreatedTime"), "5 minute", "1 minute")) \
     .agg(max("Reading").alias("MaxReading"))
 
 output_df = agg_df.select("sensor_id", "window.start", "window.end", "MaxReading")
@@ -41,7 +41,7 @@ window_query = output_df.writeStream \
     .format("console") \
     .outputMode("update") \
     .option("checkpointLocation", "chk-point-dir-sensor") \
-    .trigger(processingTime="1 minute") \
+    .trigger(processingTime="30 seconds") \
     .start()
 
 window_query.awaitTermination()
