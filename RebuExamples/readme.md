@@ -1,8 +1,8 @@
-# 🚕 Real-Time Taxi Analytics with Kafka & PySpark
+# Rebu 🚕 Real-Time Taxi Analytics with Kafka & PySpark
 
 A comprehensive streaming data pipeline demonstrating **Kafka**, **PySpark Structured Streaming**, **windowing operations**, and **watermarking** concepts using Singapore taxi trip data.
 
-## 🎯 Project Overview
+## Overview
 
 This project showcases:
 - **Real-time data streaming** with Kafka producers
@@ -10,7 +10,7 @@ This project showcases:
 - **Watermarking strategies** for handling late-arriving data
 - **Live taxi analytics** with multiple aggregation patterns
 
-## 🏗️ Architecture
+## Pipeline Architecture
 
 ```
 CSV Data → Kafka Producer → Kafka Topic → PySpark Consumers
@@ -19,7 +19,7 @@ CSV Data → Kafka Producer → Kafka Topic → PySpark Consumers
                                        └── Watermarking Demo
 ```
 
-## 📁 Project Structure
+## Project Folder Structure
 
 ```
 kafka-pyspark-streaming/
@@ -37,7 +37,7 @@ kafka-pyspark-streaming/
 └── output/                     # Query outputs (auto-created)
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Prerequisites
 - **Podman** and **podman-compose** installed
@@ -89,9 +89,9 @@ podman exec -it pyspark-streaming bash
 python src/watermarking_demo.py
 ```
 
-## 🪟 Window Operations Explained
+##  Window Operations Explained
 
-### 🔲 Tumbling Windows
+###  Tumbling Windows
 - **Non-overlapping** time windows
 - Each event belongs to exactly **one window**
 - Good for **distinct time periods** (hourly reports, daily summaries)
@@ -101,7 +101,7 @@ python src/watermarking_demo.py
 00:00-00:02 | 00:02-00:04 | 00:04-00:06 | ...
 ```
 
-### 🔄 Sliding Windows
+###  Sliding Windows
 - **Overlapping** time windows
 - Events can belong to **multiple windows**
 - Good for **trend analysis** and **smoothing**
@@ -135,7 +135,7 @@ python src/watermarking_demo.py
 
 ### Watermark Strategies
 
-#### 🔴 Strict Watermark (30 seconds)
+####  Strict Watermark (30 seconds)
 ```python
 .withWatermark("event_timestamp", "30 seconds")
 ```
@@ -143,7 +143,7 @@ python src/watermarking_demo.py
 - **Cons**: May drop valid late data
 - **Use case**: Real-time dashboards, low-latency alerts
 
-#### 🟡 Lenient Watermark (5 minutes)  
+####  Lenient Watermark (5 minutes)  
 ```python
 .withWatermark("event_timestamp", "5 minutes")
 ```
@@ -151,7 +151,7 @@ python src/watermarking_demo.py
 - **Cons**: Higher memory usage, slower processing
 - **Use case**: Batch reports, accuracy-critical analytics
 
-#### 🔵 No Watermark
+####  No Watermark
 ```python
 # No watermark specified
 ```
@@ -170,7 +170,7 @@ Consider these factors:
 
 **Rule of thumb**: Set watermark to **95th percentile** of your data lateness.
 
-## 📊 Demo Analytics
+##  Demo Analytics
 
 ### Tumbling Window Queries
 - **2-minute windows**: Trip count, revenue, average fare
@@ -188,7 +188,7 @@ Consider these factors:
 - **Late data analysis**: Categorize events by arrival lateness
 - **Memory usage**: Observe resource consumption differences
 
-## 🛠️ Configuration Options
+## Configuration Options
 
 ### Producer Configuration
 ```bash
@@ -215,7 +215,7 @@ python src/taxi_data_producer.py 50 10   # 50 events/sec for 10 minutes
 .option("checkpointLocation", "/app/checkpoints")
 ```
 
-## 📈 Monitoring & Observability
+## Monitoring & Observability
 
 ### Kafka UI (http://localhost:8080)
 - Monitor topic throughput
@@ -239,7 +239,7 @@ podman logs -f pyspark-streaming
 podman logs -f kafka
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -282,7 +282,7 @@ ENV SPARK_EXECUTOR_MEMORY=2g
 | PySpark | 2+ cores | 2+ GB | 1GB |
 | **Total** | **3.5+ cores** | **3.5+ GB** | **7GB** |
 
-## 🔧 Advanced Usage
+## More Trials 
 
 ### Custom Window Functions
 ```python
@@ -320,9 +320,8 @@ df.groupByKey(lambda x: x.pickup_district) \
   .writeStream.start()
 ```
 
-## 📚 Learning Objectives
-
-After completing this project, you'll understand:
+## In Summary
+After completing this workshop, you'll understand:
 
 1. **Kafka Fundamentals**:
    - Producer/Consumer patterns
@@ -349,41 +348,19 @@ After completing this project, you'll understand:
    - Event-time vs processing-time
    - Stateful computations
 
-## 🎓 Next Steps
 
-1. **Scale the Pipeline**:
-   - Add more Kafka partitions
-   - Implement custom partitioning strategies
-   - Deploy on Kubernetes
 
-2. **Enhanced Analytics**:
-   - Machine learning on streaming data
-   - Complex event processing (CEP)
-   - Real-time feature engineering
-
-3. **Production Readiness**:
-   - Monitoring and alerting
-   - Schema evolution with Schema Registry
-   - Security and authentication
-
-4. **Alternative Technologies**:
-   - Apache Flink for low-latency processing
-   - Apache Pulsar as Kafka alternative
-   - Delta Lake for ACID transactions
-
-## 🤝 Contributing
+## Extend
 
 1. Fork the repository
 2. Create feature branches
 3. Add tests for new functionality
 4. Submit pull requests with clear descriptions
 
-## 📄 License
+##  License
 
 This project is open-source and available under the MIT License.
 
 ---
 
-**Happy Streaming! 🚕💨**
-
-For questions or issues, please check the troubleshooting section or create an issue in the repository.
+**Happy Streaming! with Rebu 🚕Taxis **
