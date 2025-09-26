@@ -1,76 +1,108 @@
-# podman-compose.yml
-services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
-    hostname: zookeeper
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    volumes:
-      - zookeeper-data:/var/lib/zookeeper/data
-      - zookeeper-logs:/var/lib/zookeeper/log
+# compose.yml - Updated for Spark 3.5 LTS
 
+services:
   kafka:
-    image: confluentinc/cp-kafka:7.4.0
-    hostname: kafka
+    image: confluentinc/cp-kafka:7.7.0
     container_name: kafka
-    depends_on:
-      - zookeeper
+    hostname: kafka
     ports:
-      - "9092:9092"
-      - "9094:9094"
+      - "9092:9092"   # Broker listener
+      - "9093:9093"   # Controller listener
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_JMX_PORT: 9094
-      KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      # KRaft mode configuration
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+      KAFKA_LOG_DIRS: "/var/lib/kafka/data"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
     volumes:
       - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "kafka-topics", "--bootstrap-server", "localhost:9092", "--list"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - spark-network
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: kafka-ui
-    depends_on:
-      - kafka
+    hostname: kafka-ui
     ports:
       - "8080:8080"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
-      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      DYNAMIC_CONFIG_ENABLED: "true"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - spark-network
 
   pyspark-app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: pyspark-streaming
+    hostname: pyspark-streaming
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
+    ports:
+      - "4040:4040"  # Spark UI
+      - "7077:7077"  # Spark Master
+      - "8081:8081"  # Spark Worker UI
+      - "9999:9999"  # Socket communication port
+      - "8888:8888"  # Jupyter Notebook
     volumes:
       - ./data:/app/data
       - ./src:/app/src
       - ./output:/app/output
+      - ./checkpoints:/app/checkpoints
+      - ./notebooks:/app/notebooks
+      - ./logs:/app/logs
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-    command: tail -f /dev/null  # Keep container running
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPARK_MASTER_HOST=0.0.0.0
+      - SPARK_MASTER_PORT=7077
+      - SPARK_WORKER_CORES=2
+      - SPARK_WORKER_MEMORY=2g
+      - SPARK_DRIVER_MEMORY=1g
+      - SPARK_EXECUTOR_MEMORY=1g
+      - SPARK_SQL_ADAPTIVE_ENABLED=true
+      - SPARK_SQL_ADAPTIVE_COALESCE_PARTITIONS_ENABLED=true
+      - PYTHONPATH=/app/src
+      - JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+    command: tail -f /dev/null  # Keep container running for development
     networks:
-      - default
+      - spark-network
+
+  # Optional: Dedicated ncat service for socket streaming
+  ncat-server:
+    image: alpine:latest
+    container_name: ncat-server
+    ports:
+      - "9998:9999"  # Alternative ncat port
+    command: sh -c "apk add --no-cache nmap-ncat && nc -lk 9999"
+    networks:
+      - spark-network
 
 volumes:
-  zookeeper-data:
-  zookeeper-logs:
   kafka-data:
+    driver: local
 
 networks:
-  default:
+  spark-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

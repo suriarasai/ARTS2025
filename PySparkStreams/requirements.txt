@@ -1,7 +1,23 @@
-# requirements.txt
-pyspark==3.4.1
+# requirements-minimal.txt - Minimal dependencies for PySpark 3.5 LTS
+# Use this if the main requirements.txt causes build issues
+
+# Core Spark and Python packages
+pyspark==3.5.1
+findspark==2.0.1
+
+# Kafka integration
 kafka-python==2.0.2
-pandas==2.1.0
-numpy==1.24.3
-python-dateutil==2.8.2
-pytz==2023.3
+
+# Essential data processing
+pandas==2.1.4
+numpy==1.24.4
+
+# Basic development tools
+#ipython==8.18.1
+#jupyter==1.0.0
+
+# HTTP requests
+requests==2.31.0
+
+# JSON processing
+jsonschema==4.17.3

@@ -1,346 +1,262 @@
-# PySparkStreams
+# PySpark 3.5 LTS Streaming with Kafka and ncat
 
-A collection of small, focused PySpark Structured Streaming examples that read from Kafka, files, and sockets. A Podman Compose stack is provided to run Kafka (with Zookeeper) and Kafka UI locally.
+A complete development environment for Apache Spark 3.5 LTS with Kafka integration and socket streaming capabilities using ncat, optimized for Windows 11, PyCharm IDE, and Podman Desktop.
 
+## Features
 
-## Contents
-- Overview and prerequisites
-- File structure
-- Start/stop the Podman stack
-- Running examples on Windows (host Python)
-- Running selected examples inside the container (Podman)
-- Script-by-script guide (what each file does and how to run)
-- Producing sample data to Kafka topics
-- Troubleshooting notes
+- **Apache Spark 3.5 LTS** with PySpark
+- **Apache Kafka** with KRaft mode (no Zookeeper)
+- **ncat/netcat** for socket streaming
+- **Kafka UI** for monitoring and management
+- **Jupyter Notebook** possible integration
+- **Windows 11** optimized with Podman Desktop
+- **PyCharm IDE** remote interpreter support
+- **Automated development workflows** with make.bat
 
+##  Prerequisites
 
-## Prerequisites
-- Windows with:
-  - Python 3.9+
-  - Java 11 (required by PySpark)
-  - Podman Desktop or Podman for Windows (with a running podman machine)
-- Internet access (PySpark will download Kafka connector packages at runtime)
+- Windows 11
+- [Podman Desktop](https://podman-desktop.io/) installed
+- [PyCharm IDE](https://www.jetbrains.com/pycharm/) (Community or Professional)
+- Git for Windows
 
-Optional utilities:
-- Netcat/Ncat for socket demos, or use the Python alternatives listed below.
+## Quick Start
 
-Install Python dependencies (host):
+1. **Clone or create your project directory:**
+   ```bash
+   mkdir pyspark-streaming
+   cd pyspark-streaming
+   ```
 
-```bat
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+2. **Copy all the provided files to your project directory**
+
+3. **Build and start services:**
+   ```cmd
+   make.bat build
+   make.bat up
+   ```
+
+4. **Verify everything is running:**
+   ```cmd
+   make.bat status
+   make.bat health
+   ```
+
+## Available Commands
+
+### Service Management
+```cmd
+make.bat up           # Start all services
+make.bat down         # Stop all services
+make.bat restart      # Restart all services
+make.bat status       # Show container status
+make.bat health       # Check service health
 ```
 
-Set Java for the current CMD session if needed:
-
-```bat
-set JAVA_HOME=C:\Program Files\Java\jdk-11
-set PATH=%JAVA_HOME%\bin;%PATH%
+### Development
+```cmd
+make.bat shell        # Enter PySpark container
+make.bat jupyter      # Start Jupyter notebook
+make.bat pycharm      # PyCharm setup instructions
+make.bat debug        # Start in debug mode
 ```
 
-
-## File structure
-```
-PySparkStreams/
-├─ compose.yml
-├─ Dockerfile
-├─ requirements.txt
-├─ run.sh
-├─ setup.sh
-├─ data/
-│  ├─ booking/
-│  │  ├─ Booking1.json ... Booking10.json
-│  ├─ onefilebooking/Booking.json
-│  ├─ rebu/
-│  │  ├─ Booking.json
-│  │  ├─ Customer.json
-│  │  ├─ Taxi.json
-│  │  ├─ booking/booking1.csv ... booking7.csv
-│  │  └─ driver/Driver-Data-Set001.json ... 003.json
-│  └─ window/
-│     ├─ device-data.txt
-│     ├─ sensors.txt
-│     └─ trades.json
-├─ output/ (created by some examples)
-└─ src/
-   ├─ BookingKafkaStreamProducer.py
-   ├─ BookingSlidingWindow.py
-   ├─ BookingTumblingWindow.py
-   ├─ FileBookingStreamingDemo.py
-   ├─ FileDriverStreamingDemo.py
-   ├─ main.py
-   ├─ ReadJSON.py
-   ├─ SimpleBookingGenerator.py
-   ├─ SimpleBookingProcessor.py
-   ├─ SlidingWindowDemo.py
-   ├─ StreamCompleteMode.py
-   ├─ StreamUpdateMode.py
-   ├─ StreamWordCount.py
-   ├─ TriggersDemo.py
-   ├─ TumblingWindowDemo.py
-   ├─ WatermarkDemo.py
-   └─ WindowAggregation.py
+### Monitoring
+```cmd
+make.bat spark-ui     # Open Spark UI (http://localhost:4040)
+make.bat kafka-ui     # Open Kafka UI (http://localhost:8080)
+make.bat logs         # Show all logs
+make.bat logs-app     # Show PySpark logs only
 ```
 
-
-## Start/stop the local stack (Podman Compose)
-This brings up Zookeeper, Kafka, Kafka UI, and an idle PySpark container.
-
-Start:
-```bat
-podman compose -f compose.yml up -d
+### Socket Streaming
+```cmd
+make.bat ncat         # Start ncat listener on port 9999
+make.bat test-socket  # Test socket connection
 ```
 
-Stop and remove:
-```bat
-podman compose -f compose.yml down
+### Kafka Operations
+```cmd
+make.bat topics           # List Kafka topics
+make.bat create-topic     # Create a new topic
 ```
 
-Kafka UI will be available at:
-- http://localhost:8080
-
-Kafka listeners (from compose):
-- Inside containers: kafka:29092
-- From host: localhost:9092
-
-Auto-create topics is enabled in the Kafka service, so consumers/producers can create topics on first use.
-
-
-## Running examples on Windows (host Python)
-This is the simplest way to run Kafka-based scripts in this repo because many scripts use kafka bootstrap "localhost:9092" (which works from the host but not from inside the container without editing code).
-
-General pattern from the repo root:
-```bat
-python src\<ScriptName>.py
+### Cleanup
+```cmd
+make.bat clean        # Clean containers and volumes
+make.bat clean-all    # Clean everything including images
 ```
 
-File-streaming demos expect the working directory to be the data folder. For those, run from data/ so relative paths resolve:
-```bat
-cd data
-python ..\src\FileBookingStreamingDemo.py
+## PyCharm IDE Integration
+
+1. **Start the services:**
+   ```cmd
+   make.bat up
+   ```
+
+2. **Configure Remote Interpreter:**
+   - Open PyCharm Settings (File → Settings)
+   - Navigate to Project → Python Interpreter
+   - Click the gear icon → Add...
+   - Select "Docker" or "Podman"
+   - Configure:
+     - **Server**: podman
+     - **Image**: Use existing container `pyspark-streaming`
+     - **Python interpreter path**: `/usr/bin/python3`
+
+3. **Set up Run Configurations:**
+   - Create new Python configuration
+   - Set script path to your Python files in `/app/src`
+   - Set environment variables if needed
+
+## Socket Streaming Examples
+
+### Basic Socket
+
+1. **Start ncat listener:**
+   ```cmd
+   make.bat ncat
+   ```
+
+2. **Run the streaming example:**
+   ```cmd
+   make.bat shell
+   cd /app/src
+   python socket_streaming_example.py socket
+   ```
+
+3. **Send test data:**
+   ```cmd
+   echo "Hello Spark Streaming!" | nc localhost 9999
+   ```
+
+### Socket to Kafka Pipeline
+
+1. **Create Kafka topic:**
+   ```cmd
+   make.bat create-topic
+   # Enter: socket-messages
+   ```
+
+2. **Run the pipeline:**
+   ```cmd
+   make.bat shell
+   python socket_streaming_example.py pipeline
+   ```
+
+3. **Send data and monitor:**
+   ```cmd
+   # Send data
+   echo "Processing message 123" | nc localhost 9999
+   
+   # Monitor Kafka UI
+   make.bat kafka-ui
+   ```
+
+## Debugging and Development
+
+### Debug Mode
+```cmd
+make.bat debug
+```
+This starts services with remote debugging enabled on port 5005.
+
+### View Logs
+```cmd
+# All services
+make.bat logs
+
+# Specific service
+make.bat logs-app
+make.bat logs-kafka
 ```
 
+### Interactive Development
+```cmd
+# Enter container shell
+make.bat shell
 
-## Running selected examples inside the container (Podman)
-The PySpark container mounts the repo at /app. For file-based demos (no Kafka), you can exec into the container and run them. Use the data folder as working directory so relative file paths resolve.
+# Start Python/PySpark shell
+pyspark
 
-Examples:
-```bat
-podman exec -w /app/data -it pyspark-streaming python /app/src/FileBookingStreamingDemo.py
-podman exec -w /app/data -it pyspark-streaming python /app/src/FileDriverStreamingDemo.py
+# Or start IPython
+ipython
 ```
 
-Important:
-- Scripts that talk to Kafka are hard-coded to use "localhost:9092". Inside a container, "localhost" refers to the container itself, not the Kafka broker. Either run those scripts on the host or edit them to use "kafka:29092" when running inside the container.
+## Monitoring and UIs
 
+| Service | URL | Description |
+|---------|-----|-------------|
+| Spark UI | http://localhost:4040 | Spark jobs and stages |
+| Kafka UI | http://localhost:8080 | Kafka topics and messages |
+| Jupyter | http://localhost:8888 | Notebook interface |
 
-## Script-by-script guide
-Brief description and how to run each script. Unless stated otherwise, run from the repo root on the host.
+## 🗂️ Directory Structure
 
-- src\main.py
-  - Tiny example that prints a greeting.
-  - Run:
-    ```bat
-    python src\main.py
-    ```
-
-- src\ReadJSON.py
-  - Reads newline-delimited JSON from data\onefilebooking\Booking.json and prints objects.
-  - Run from data/ so the relative path resolves:
-    ```bat
-    cd data
-    python ..\src\ReadJSON.py
-    ```
-
-- src\FileBookingStreamingDemo.py
-  - Structured Streaming from CSV files in data\rebu\booking\ to CSV sink booking-output/ with checkpointing. One file per trigger.
-  - Run (host):
-    ```bat
-    cd data
-    python ..\src\FileBookingStreamingDemo.py
-    ```
-  - Run (container):
-    ```bat
-    podman exec -w /app/data -it pyspark-streaming python /app/src/FileBookingStreamingDemo.py
-    ```
-
-- src\FileDriverStreamingDemo.py
-  - Structured Streaming from JSON files in data\rebu\driver\ to JSON sink driver-output/ with checkpointing.
-  - Run (host):
-    ```bat
-    cd data
-    python ..\src\FileDriverStreamingDemo.py
-    ```
-  - Run (container):
-    ```bat
-    podman exec -w /app/data -it pyspark-streaming python /app/src/FileDriverStreamingDemo.py
-    ```
-
-- src\BookingKafkaStreamProducer.py
-  - Kafka producer that reads data\onefilebooking\Booking.json and sends each line to topic "booking".
-  - Requires Kafka at localhost:9092.
-  - Run (host):
-    ```bat
-    cd data
-    python ..\src\BookingKafkaStreamProducer.py
-    ```
-
-- src\BookingTumblingWindow.py
-  - Kafka consumer/processor that reads topic "booking" and performs a 10-minute tumbling window count on MessageSubmittedTime.
-  - Requires messages like those produced by BookingKafkaStreamProducer.py.
-  - Run (host):
-    ```bat
-    python src\BookingTumblingWindow.py
-    ```
-
-- src\BookingSlidingWindow.py
-  - Kafka consumer/processor that reads topic "booking" and performs a 100-minute window with 10-minute slide (sliding window) counts.
-  - Run (host):
-    ```bat
-    python src\BookingSlidingWindow.py
-    ```
-
-- src\SimpleBookingGenerator.py
-  - Synthetic Kafka producer to topic "taxi_bookings" emitting simple JSON bookings every second.
-  - Run (host):
-    ```bat
-    python src\SimpleBookingGenerator.py
-    ```
-
-- src\SimpleBookingProcessor.py
-  - Kafka consumer/processor for topic "taxi_bookings". Parses JSON, converts timestamps, aggregates counts by pickup location per 1-minute window and prints to console.
-  - Run (host):
-    ```bat
-    python src\SimpleBookingProcessor.py
-    ```
-
-- src\SlidingWindowDemo.py
-  - Kafka consumer for topic "sensor". Demonstrates watermark + sliding windows, reports max Reading per SensorID over 15-minute window sliding every 5 minutes.
-  - Run (host):
-    ```bat
-    python src\SlidingWindowDemo.py
-    ```
-
-- src\TumblingWindowDemo.py
-  - Kafka consumer for topic "trades". Groups by 15-minute tumbling windows and sums Buy/Sell amounts.
-  - Run (host):
-    ```bat
-    python src\TumblingWindowDemo.py
-    ```
-
-- src\WatermarkDemo.py
-  - Kafka consumer for topic "trades" with watermarking (30 minutes), windowed aggregation, console output.
-  - Run (host):
-    ```bat
-    python src\WatermarkDemo.py
-    ```
-
-- src\WindowAggregation.py
-  - Kafka consumer for a generic topic (default "my-topic"). Demonstrates sliding windows (60s window, 30s slide) with watermark.
-  - Update the topic in the script or send data to "my-topic". Run (host):
-    ```bat
-    python src\WindowAggregation.py
-    ```
-
-- src\TriggersDemo.py
-  - Kafka consumer for topic "device-data" showing different trigger modes and schema flattening. Writes to console and memory.
-  - Run (host):
-    ```bat
-    python src\TriggersDemo.py
-    ```
-
-- src\StreamWordCount.py
-  - Socket streaming word count on port 9998 in complete mode with a 3s trigger.
-  - Start a text source on port 9998, e.g. with ncat:
-    ```bat
-    ncat -l -p 9998
-    ```
-  - Then run:
-    ```bat
-    python src\StreamWordCount.py
-    ```
-
-- src\StreamCompleteMode.py
-  - Socket streaming word count on port 9999 in complete mode.
-  - Start a text source on port 9999, then run:
-    ```bat
-    python src\StreamCompleteMode.py
-    ```
-
-- src\StreamUpdateMode.py
-  - Socket streaming word count on port 9999 in update mode.
-  - Start a text source on port 9999, then run:
-    ```bat
-    python src\StreamUpdateMode.py
-    ```
-
-
-## Producing sample data to Kafka topics
-You can use the included producers or Kafka CLI from inside the Kafka container. Kafka UI is also useful for producing messages.
-
-Kafka console producer via container (examples):
-
-- Sensor topic:
-```bat
-podman exec -it kafka kafka-console-producer --bootstrap-server kafka:29092 --topic sensor
 ```
-Example payloads (paste into the producer; the consumer expects JSON values like this and separate key):
-```
-{"CreatedTime":"2025-01-01 10:00:00","Reading":21.5}
-{"CreatedTime":"2025-01-01 10:03:00","Reading":22.1}
+your-project/
+├── compose.yml              # Docker compose configuration
+├── Dockerfile              # PySpark container definition
+├── requirements.txt         # Python dependencies
+├── spark-defaults.conf      # Spark configuration
+├── make.bat                # Windows automation script
+├── README.md               # This file
+├── src/                    # Your Python source code
+├── data/                   # Input data files
+├── output/                 # Output results
+├── checkpoints/           # Spark streaming checkpoints
+├── logs/                  # Application logs
+└── notebooks/             # Jupyter notebooks
 ```
 
-- Trades topic:
-```bat
-podman exec -it kafka kafka-console-producer --bootstrap-server kafka:29092 --topic trades
-```
-Example lines:
-```
-{"CreatedTime":"2025-01-01 10:00:00","Type":"BUY","Amount":100,"BrokerCode":"BRK1"}
-{"CreatedTime":"2025-01-01 10:01:30","Type":"SELL","Amount":70,"BrokerCode":"BRK2"}
+## Troubleshooting
+
+### Container Won't Start
+```cmd
+make.bat logs-app
+# Check for Java/Python path issues
 ```
 
-- Device data topic:
-```bat
-podman exec -it kafka kafka-console-producer --bootstrap-server kafka:29092 --topic device-data
-```
-Example lines (simplified):
-```
-{"customerId":"c1","data":{"devices":[{"deviceId":"d1","measure":"temp","status":"OK","temperature":30}]},"eventId":"e1","eventOffset":1,"eventPublisher":"p","eventTime":"2025-01-01T10:00:00Z"}
+### Kafka Connection Issues
+```cmd
+make.bat health
+# Verify Kafka is healthy before starting Spark streaming
 ```
 
-- Booking topics using the provided producers (host):
-```bat
-cd data
-python ..\src\BookingKafkaStreamProducer.py   REM sends to topic "booking"
-python ..\src\SimpleBookingGenerator.py       REM sends to topic "taxi_bookings"
+### Socket Connection Refused
+```cmd
+make.bat test-socket
+# Ensure ncat listener is running
 ```
 
+### Port Already in Use
+- Check if services are already running: `make.bat status`
+- Stop conflicting services: `make.bat down`
 
-## Troubleshooting notes
-- Inside-container Kafka access: change bootstrap servers to "kafka:29092" if you want to run Kafka-based scripts inside the container. As written, most scripts use "localhost:9092" and should be run on the host.
-- Connector package versions: scripts pin different spark-sql-kafka versions (3.1.2, 3.3.0, 3.4.3). With PySpark 3.4.1 this usually works, but ensure internet access so Spark can download the jars. If you see version errors, align the package version with your PySpark version.
-- File path expectations: file-streaming scripts use relative paths like "rebu\\booking" and expect the working directory to be the data folder. Run `cd data` first as shown above.
-- Permissions and ports: ensure ports 9092 (Kafka), 2181 (Zookeeper), 8080 (Kafka UI), and 9998/9999 (socket demos) are free.
-- Windows socket demos: if `ncat` is unavailable, you can use Python to send lines:
-  ```bat
-  python - <<PY
-  import socket, time
-  s=socket.socket(); s.connect(("127.0.0.1", 9999))
-  for i in range(100):
-      s.sendall(f"hello {i}\n".encode()); time.sleep(0.5)
-  s.close()
-  PY
-  ```
-- Output locations: many examples write to console; file demos write under the current working directory (e.g., booking-output/, driver-output/). Checkpoint directories are created automatically.
+## Performance Tuning
 
+### Spark Configuration
+Edit `spark-defaults.conf` to adjust:
+- Memory allocation (`spark.executor.memory`)
+- CPU cores (`spark.executor.cores`)
+- Parallelism settings
 
-## Notes about the container image
-The Dockerfile installs OpenJDK 11 and Python, then installs requirements. The compose service `pyspark-app` keeps the container running idle (tail -f /dev/null) so you can exec into it to run scripts. Source and data folders are bind-mounted into the container for fast edit-run cycles.
+### Kafka Configuration
+Adjust in `compose.yml`:
+- Partition count for topics
+- Retention policies
+- Memory settings
 
-If you run into issues with the image or need to rebuild:
-```bat
-podman compose -f compose.yml build pyspark-app
-podman compose -f compose.yml up -d --force-recreate
-```
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## Documentation Support
+
+For issues related to:
+- **Spark**: Check [Apache Spark Documentation](https://spark.apache.org/docs/latest/)
+- **Kafka**: Check [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
+- **Podman**: Check [Podman Documentation](https://docs.podman.io/)
+
+---
 

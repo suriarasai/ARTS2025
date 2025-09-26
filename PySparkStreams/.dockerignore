@@ -1,0 +1,47 @@
+# .dockerignore
+.git
+.gitignore
+README.md
+Dockerfile
+.dockerignore
+compose.yml
+podman-compose.yml
+make.bat
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+pip-log.txt
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Data directories (will be mounted as volumes)
+data/
+output/
+checkpoints/
+notebooks/
+
+# Temporary files
+*.tmp
+*.temp
